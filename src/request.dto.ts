@@ -7,6 +7,10 @@ export default class RequestDto extends Base<Param | ParamShape | ParamShapeArra
 
 	public static required = required;
 
+	public static toArray() {
+		return new this().toArray();
+	}
+
 	public toArray(): Array<Param | ParamShape | ParamShapeArray> {
 		return this.getProperties().map((property) => {
 			if (this.isPropertyShape(property)) {
@@ -34,11 +38,11 @@ export default class RequestDto extends Base<Param | ParamShape | ParamShapeArra
 		});
 	}
 
-	public getProperties(): Array<string> {
+	protected getProperties(): Array<string> {
 		return super.getProperties().filter((property) => !['__required__'].includes(property));
 	}
 
-	public isPropertyRequired(property: string): boolean {
+	protected isPropertyRequired(property: string): boolean {
 		return (this.__required__ || []).includes(property);
 	}
 }

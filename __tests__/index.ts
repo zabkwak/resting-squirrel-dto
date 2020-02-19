@@ -73,6 +73,13 @@ class TestRequestDto extends RequestDto {
 	@RequestDto.shape(TestRequestShapeDto)
 	public shape: TestRequestShapeDto;
 
+	@RequestDto.arrayOf(Type.string)
+	public array: Array<string>;
+
+	@RequestDto.enum('baf', 'lek')
+	@RequestDto.required
+	public enum: 'baf' | 'lek';
+
 	// public noDecorators: any;
 }
 
@@ -103,6 +110,8 @@ describe('Decorators', () => {
 				new Param('test', true, Type.string, 'Test'),
 				new Param('boolean', false, Type.boolean, ''),
 			),
+			new Param('array', false, Type.arrayOf(Type.string), ''),
+			new Param('enum', true, Type.enum_('baf', 'lek'), ''),
 			// new Param('noDecorators', false, Type.any, ''),
 		]);
 	});

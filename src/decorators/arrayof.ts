@@ -6,7 +6,7 @@ import typeDecorator from './type';
 export default (type: Type.Type | (new () => BaseDto<any>)): PropertyDecorator => {
 	const d = (target: any, property: string, descriptor: PropertyDescriptor) => {
 		if (Type.isValidType(type)) {
-			typeDecorator(Type.arrayOf(type as Type.Type));
+			return typeDecorator(Type.arrayOf(type as Type.Type))(target, property);
 		} else {
 			if (!target.__shape_arrays__) {
 				target.__shape_arrays__ = {};

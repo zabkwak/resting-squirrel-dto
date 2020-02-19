@@ -1,8 +1,9 @@
 {
 	"name": "resting-squirrel-dto",
 	"version": "1.0.0",
-	"description": "",
+	"description": "DTO helper for resting-squirrel.",
 	"main": "index.js",
+	"types": "./dist/index.d.ts",
 	"scripts": {
 		"create_index": "run-script-os",
 		"create_index:win32": "echo module.exports = require('./dist'); > index.js",
@@ -38,6 +39,7 @@
 		"chai": "^4.2.0",
 		"mocha": "^6.2.0",
 		"resting-squirrel": "^2.17.9",
+		"resting-squirrel-connector": "^1.7.0",
 		"run-script-os-fix": "^1.0.4",
 		"source-map-support": "^0.5.13",
 		"ts-node": "^8.3.0",
@@ -47,5 +49,13 @@
 	},
 	"peerDependencies": {
 		"resting-squirrel": "^2.17.9"
-	}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/zabkwak/resting-squirrel-dto.git"
+	},
+	"bugs": {
+		"url": "https://github.com/zabkwak/resting-squirrel-dto/issues"
+	},
+	"homepage": "https://github.com/zabkwak/resting-squirrel-dto#readme"
 }

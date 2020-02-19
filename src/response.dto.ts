@@ -4,6 +4,10 @@ import Base from './base.dto';
 
 export default class ResponseDto extends Base<Field | FieldShape | FieldShapeArray> {
 
+	public static toArray() {
+		return new this().toArray();
+	}
+
 	public toArray(): Array<Field | FieldShape | FieldShapeArray> {
 		return this.getProperties().map((property) => {
 			if (this.isPropertyShape(property)) {

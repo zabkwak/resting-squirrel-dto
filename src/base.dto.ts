@@ -47,6 +47,11 @@ export default class BaseDto<FieldType> {
 	public static boolean = BaseDto.type(Type.boolean);
 
 	/**
+	 * Defines the property as an object.
+	 */
+	public static object = BaseDto.type(Type.object);
+
+	/**
 	 * Defines the property as an any.
 	 */
 	public static any = BaseDto.type(Type.any);

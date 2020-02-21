@@ -129,6 +129,8 @@ Defines the property as a float.
 Defines the property as a date.
 ##### `boolean`
 Defines the property as a boolean.
+##### `object`
+Defines the property as an object.
 ##### `any`
 Defines the property as an any.
 ##### `enum(...values: Array<string>)`

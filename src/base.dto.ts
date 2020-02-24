@@ -4,8 +4,13 @@ import arrayOf from './decorators/arrayof';
 import description from './decorators/description';
 import typeDecorator from './decorators/type';
 
+export interface IStore {
+
+}
+
 export default class BaseDto<FieldType> {
 
+	// #region Decorators
 	/**
 	 * Defines the property as a type or DTO class as Shape.
 	 */
@@ -65,6 +70,8 @@ export default class BaseDto<FieldType> {
 	 * Defines the property as a shape.
 	 */
 	public static shape = (shape: new () => BaseDto<any>) => BaseDto.type(shape);
+
+	// #endregion
 
 	public static toArray() {
 		return new this().toArray();

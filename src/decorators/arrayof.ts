@@ -3,10 +3,10 @@ import { Field, Type } from 'resting-squirrel';
 import BaseDto from '../base.dto';
 import typeDecorator from './type';
 
-export default (type: Type.Type | (new () => BaseDto<any>)): PropertyDecorator => {
-	const d = (target: any, property: string, descriptor: PropertyDescriptor) => {
+export default (type: Type.Type | (new () => BaseDto<any>)) => {
+	return (target: any, property: string) => {
 		if (Type.isValidType(type)) {
-			return typeDecorator(Type.arrayOf(type as Type.Type))(target, property);
+			typeDecorator(Type.arrayOf(type as Type.Type))(target, property);
 		} else {
 			if (!target.__shape_arrays__) {
 				target.__shape_arrays__ = {};
@@ -17,7 +17,5 @@ export default (type: Type.Type | (new () => BaseDto<any>)): PropertyDecorator =
 			}
 			target.__properties__.push(property);
 		}
-		return descriptor;
 	};
-	return d as unknown as PropertyDecorator;
 };

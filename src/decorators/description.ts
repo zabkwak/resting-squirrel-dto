@@ -1,10 +1,8 @@
-export default (description: string): PropertyDecorator => {
-	const d = (target: any, property: string, descriptor: PropertyDescriptor) => {
+export default (description: string) => {
+	return (target: any, property: string) => {
 		if (!target.__descriptions__) {
 			target.__descriptions__ = {};
 		}
 		target.__descriptions__[property] = description;
-		return descriptor;
 	};
-	return d as unknown as PropertyDecorator;
 };

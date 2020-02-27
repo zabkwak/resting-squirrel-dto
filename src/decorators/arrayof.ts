@@ -1,6 +1,6 @@
 import { Field, Type } from 'resting-squirrel';
 
-import BaseDto from '../base.dto';
+import BaseDto, { IStore } from '../base.dto';
 import typeDecorator from './type';
 
 export default (type: Type.Type | (new () => BaseDto<any>)) => {
@@ -8,12 +8,14 @@ export default (type: Type.Type | (new () => BaseDto<any>)) => {
 		if (Type.isValidType(type)) {
 			typeDecorator(Type.arrayOf(type as Type.Type))(target, property);
 		} else {
-			if (!target.__shape_arrays__) {
-				target.__shape_arrays__ = {};
+			const t = target as unknown as IStore;
+			if (!t.__shape_arrays__) {
+				t.__shape_arrays__ = {};
 			}
-			target.__shape_arrays__[property] = type;
-			if (!target.__properties__) {
-				target.__properties__ = [];
+			const _type = type;
+			t.__shape_arrays__[property] = _type as new () => BaseDto<any>;
+			if (!t.__properties__) {
+				t.__properties__ = [];
 			}
 			target.__properties__.push(property);
 		}

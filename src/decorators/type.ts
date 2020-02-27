@@ -1,23 +1,25 @@
-import { Field, Type } from 'resting-squirrel';
+import { Type } from 'resting-squirrel';
 
-import BaseDto from '../base.dto';
+import BaseDto, { IStore } from '../base.dto';
 
 export default (type: Type.Type | (new () => BaseDto<any>)) => {
-	return (target: any, property: string) => {
+	return (target: BaseDto<any>, property: string) => {
+		const t = target as unknown as IStore;
+		const _type = type;
 		if (Type.isValidType(type)) {
-			if (!target.__types__) {
-				target.__types__ = {};
+			if (!t.__types__) {
+				t.__types__ = {};
 			}
-			target.__types__[property] = type;
+			t.__types__[property] = _type as Type.Type;;
 		} else {
-			if (!target.__shapes__) {
-				target.__shapes__ = {};
+			if (!t.__shapes__) {
+				t.__shapes__ = {};
 			}
-			target.__shapes__[property] = type;
+			t.__shapes__[property] = _type as new () => BaseDto<any>;
 		}
-		if (!target.__properties__) {
-			target.__properties__ = [];
+		if (!t.__properties__) {
+			t.__properties__ = [];
 		}
-		target.__properties__.push(property);
+		t.__properties__.push(property);
 	};
 };

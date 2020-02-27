@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Field, Param, Type } from 'resting-squirrel';
 
-import { RequestDto, ResponseDto } from '../src';
+import BaseDto, { RequestDto, ResponseDto } from '../src';
 
 class NestedShapeResponseDto extends ResponseDto {
 
@@ -83,6 +83,31 @@ class TestRequestDto extends RequestDto {
 	// public noDecorators: any;
 }
 
+// tslint:disable-next-line: max-classes-per-file
+class TestDto extends BaseDto {
+
+	@BaseDto.integer
+	@BaseDto.response
+	@BaseDto.description('ID')
+	public id: number;
+
+	@BaseDto.string
+	@BaseDto.required
+	@BaseDto.description('Name')
+	public name: string;
+
+	@BaseDto.string
+	@BaseDto.param
+	@BaseDto.description('Param only')
+	public param: string;
+
+	@BaseDto.string
+	@BaseDto.param
+	@BaseDto.response
+	@BaseDto.description('Both')
+	public both: string;
+}
+
 
 describe('Decorators', () => {
 
@@ -113,6 +138,19 @@ describe('Decorators', () => {
 			new Param('array', false, Type.arrayOf(Type.string), ''),
 			new Param('enum', true, Type.enum_('baf', 'lek'), ''),
 			// new Param('noDecorators', false, Type.any, ''),
+		]);
+	});
+
+	it('checks the unified dto', () => {
+		expect(TestDto.toParams()).to.be.deep.equal([
+			new Param('name', true, Type.string, 'Name'),
+			new Param('param', false, Type.string, 'Param only'),
+			new Param('both', false, Type.string, 'Both'),
+		]);
+		expect(TestDto.toResponse()).to.be.deep.equal([
+			new Field('id', Type.integer, 'ID'),
+			new Field('name', Type.string, 'Name'),
+			new Field('both', Type.string, 'Both'),
 		]);
 	});
 });

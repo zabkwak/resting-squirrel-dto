@@ -1,14 +1,24 @@
-import { Field, Type } from 'resting-squirrel';
+import { Field, FieldShape, FieldShapeArray, Param, ParamShape, ParamShapeArray, Type } from 'resting-squirrel';
 
 import arrayOf from './decorators/arrayof';
 import description from './decorators/description';
+import param from './decorators/param';
+import required from './decorators/required';
+import response from './decorators/response';
 import typeDecorator from './decorators/type';
 
 export interface IStore {
-
+	__properties__: Array<string>;
+	__params__: Array<string>;
+	__responses__: Array<string>;
+	__required__: Array<string>;
+	__descriptions__: { [property: string]: string };
+	__shapes__: { [property: string]: new () => BaseDto<any> };
+	__shape_arrays__: { [property: string]: new () => BaseDto<any> };
+	__types__: { [property: string]: Type.Type };
 }
 
-export default class BaseDto<FieldType> {
+export default class BaseDto<FieldType = any> {
 
 	// #region Decorators
 	/**
@@ -25,6 +35,21 @@ export default class BaseDto<FieldType> {
 	 * Defines the description to the property.
 	 */
 	public static description = description;
+
+	/**
+	 * Indicates if the property is required. Usable only on parameters.
+	 */
+	public static required = required;
+
+	/**
+	 * Defines the property as parameter.
+	 */
+	public static param = param;
+
+	/**
+	 * Defines the property as response.
+	 */
+	public static response = response;
 
 	/**
 	 * Defines the property as an integer.
@@ -77,11 +102,84 @@ export default class BaseDto<FieldType> {
 		return new this().toArray();
 	}
 
+	public static toParams() {
+		return new this().toParams();
+	}
+
+	public static toResponse() {
+		return new this().toResponse();
+	}
+
 	// Hack for decorators underline properties.
 	[x: string]: any;
 
 	public toArray(): Array<FieldType> {
 		throw new Error('Not implemented');
+	}
+
+	public toParams(): Array<Param | ParamShape | ParamShapeArray> {
+		return this.getProperties()
+			.filter((property) => {
+				if (this.isPropertyResponse(property) && !this.isPropertyParam(property)) {
+					return false;
+				}
+				return true;
+			})
+			.map((property) => {
+				if (this.isPropertyShape(property)) {
+					return new Param.Shape(
+						property,
+						this.isPropertyRequired(property),
+						this.getPropertyDescription(property),
+						...(new (this.getPropertyShape(property) as typeof BaseDto)()).toParams(),
+					);
+				}
+				if (this.isPropertyShapeArray(property)) {
+					return new Param.ShapeArray(
+						property,
+						this.isPropertyRequired(property),
+						this.getPropertyDescription(property),
+						...(new (this.getPropertyShapeArray(property) as typeof BaseDto)()).toParams(),
+					);
+				}
+				return new Param(
+					property,
+					this.isPropertyRequired(property),
+					this.getPropertyType(property),
+					this.getPropertyDescription(property),
+				);
+			});
+	}
+
+	public toResponse(): Array<Field | FieldShape | FieldShapeArray> {
+		return this.getProperties()
+			.filter((property) => {
+				if (this.isPropertyParam(property) && !this.isPropertyResponse(property)) {
+					return false;
+				}
+				return true;
+			})
+			.map((property) => {
+				if (this.isPropertyShape(property)) {
+					return new Field.Shape(
+						property,
+						this.getPropertyDescription(property),
+						...(new (this.getPropertyShape(property) as typeof BaseDto)()).toResponse(),
+					);
+				}
+				if (this.isPropertyShapeArray(property)) {
+					return new Field.ShapeArray(
+						property,
+						this.getPropertyDescription(property),
+						...(new (this.getPropertyShapeArray(property) as typeof BaseDto)()).toResponse(),
+					);
+				}
+				return new Field(
+					property,
+					this.getPropertyType(property),
+					this.getPropertyDescription(property),
+				);
+			});
 	}
 
 	protected getPropertyDescription(property: string): string {
@@ -120,10 +218,22 @@ export default class BaseDto<FieldType> {
 		return Boolean(this.getPropertyShapeArray(property));
 	}
 
+	protected isPropertyRequired(property: string): boolean {
+		return (this.__required__ || []).includes(property);
+	}
+
+	protected isPropertyParam(property: string): boolean {
+		return (this.__params__ || []).includes(property);
+	}
+
+	protected isPropertyResponse(property: string): boolean {
+		return (this.__responses__ || []).includes(property);
+	}
+
 	protected getProperties(): Array<string> {
 		return [...(this.__properties__ || []), ...Object.getOwnPropertyNames(this)]
 			.filter((property) => ![
-				'__descriptions__', '__properties__', '__types__', '__shapes__', '__shape_arrays__',
+				'__descriptions__', '__properties__', '__types__', '__shapes__', '__shape_arrays__', '__required__', '__params__', '__responses__',
 			].includes(property));
 	}
 }

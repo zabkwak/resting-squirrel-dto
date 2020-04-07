@@ -102,8 +102,8 @@ export default class BaseDto<FieldType = any> {
 		return new this().toArray();
 	}
 
-	public static toParams() {
-		return new this().toParams();
+	public static toParams(optional: Array<string> = []) {
+		return new this().toParams(optional);
 	}
 
 	public static toResponse() {
@@ -117,7 +117,7 @@ export default class BaseDto<FieldType = any> {
 		throw new Error('Not implemented');
 	}
 
-	public toParams(): Array<Param | ParamShape | ParamShapeArray> {
+	public toParams(optional: Array<string> = []): Array<Param | ParamShape | ParamShapeArray> {
 		return this.getProperties()
 			.filter((property) => {
 				if (this.isPropertyResponse(property) && !this.isPropertyParam(property)) {
@@ -129,22 +129,24 @@ export default class BaseDto<FieldType = any> {
 				if (this.isPropertyShape(property)) {
 					return new Param.Shape(
 						property,
-						this.isPropertyRequired(property),
+						this.isPropertyRequired(property, optional),
 						this.getPropertyDescription(property),
-						...(new (this.getPropertyShape(property) as typeof BaseDto)()).toParams(),
+						...(new (this.getPropertyShape(property) as typeof BaseDto)())
+							.toParams(this._getNestedOptional(property, optional)),
 					);
 				}
 				if (this.isPropertyShapeArray(property)) {
 					return new Param.ShapeArray(
 						property,
-						this.isPropertyRequired(property),
+						this.isPropertyRequired(property, optional),
 						this.getPropertyDescription(property),
-						...(new (this.getPropertyShapeArray(property) as typeof BaseDto)()).toParams(),
+						...(new (this.getPropertyShapeArray(property) as typeof BaseDto)())
+							.toParams(this._getNestedOptional(property, optional)),
 					);
 				}
 				return new Param(
 					property,
-					this.isPropertyRequired(property),
+					this.isPropertyRequired(property, optional),
 					this.getPropertyType(property),
 					this.getPropertyDescription(property),
 				);
@@ -218,7 +220,10 @@ export default class BaseDto<FieldType = any> {
 		return Boolean(this.getPropertyShapeArray(property));
 	}
 
-	protected isPropertyRequired(property: string): boolean {
+	protected isPropertyRequired(property: string, optional: Array<string> = []): boolean {
+		if (optional.includes(property)) {
+			return false;
+		}
 		return (this.__required__ || []).includes(property);
 	}
 
@@ -235,5 +240,19 @@ export default class BaseDto<FieldType = any> {
 			.filter((property) => ![
 				'__descriptions__', '__properties__', '__types__', '__shapes__', '__shape_arrays__', '__required__', '__params__', '__responses__',
 			].includes(property));
+	}
+
+	private _getNestedOptional(property: string, optional: Array<string>): Array<string> {
+		return optional
+			.map((field) => {
+				const firstDot = field.indexOf('.');
+				if (firstDot < 0) {
+					return null;
+				}
+				const parent = field.substr(0, firstDot);
+				const child = field.substr(firstDot + 1);
+				return parent === property ? child : null;
+			})
+			.filter((field) => Boolean(field));
 	}
 }

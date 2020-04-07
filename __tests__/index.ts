@@ -106,6 +106,10 @@ class TestDto extends BaseDto {
 	@BaseDto.response
 	@BaseDto.description('Both')
 	public both: string;
+
+	@BaseDto.shape(TestRequestShapeDto)
+	@BaseDto.required
+	public shape: TestRequestShapeDto;
 }
 
 
@@ -146,11 +150,52 @@ describe('Decorators', () => {
 			new Param('name', true, Type.string, 'Name'),
 			new Param('param', false, Type.string, 'Param only'),
 			new Param('both', false, Type.string, 'Both'),
+			new Param.Shape(
+				'shape',
+				true,
+				'',
+				new Param('test', true, Type.string, 'Test'),
+				new Param('boolean', false, Type.boolean, ''),
+			),
 		]);
 		expect(TestDto.toResponse()).to.be.deep.equal([
 			new Field('id', Type.integer, 'ID'),
 			new Field('name', Type.string, 'Name'),
 			new Field('both', Type.string, 'Both'),
+			new Field.Shape(
+				'shape',
+				'',
+				new Field('test', Type.string, 'Test'),
+				new Field('boolean', Type.boolean, ''),
+			),
+		]);
+	});
+
+	it('checks the optional parameters override', () => {
+		expect(TestDto.toParams(['name', 'shape'])).to.be.deep.equal([
+			new Param('name', false, Type.string, 'Name'),
+			new Param('param', false, Type.string, 'Param only'),
+			new Param('both', false, Type.string, 'Both'),
+			new Param.Shape(
+				'shape',
+				false,
+				'',
+				new Param('test', true, Type.string, 'Test'),
+				new Param('boolean', false, Type.boolean, ''),
+			),
+		]);
+		expect(TestDto.toParams(['name', 'shape.test'])).to.be.deep.equal([
+			new Param('name', false, Type.string, 'Name'),
+			new Param('param', false, Type.string, 'Param only'),
+			new Param('both', false, Type.string, 'Both'),
+			// Doesn't make any sense but for testing :)
+			new Param.Shape(
+				'shape',
+				true,
+				'',
+				new Param('test', false, Type.string, 'Test'),
+				new Param('boolean', false, Type.boolean, ''),
+			),
 		]);
 	});
 });

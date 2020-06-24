@@ -124,6 +124,9 @@ export default class RSDto {
 				if (this._isPropertyResponse(dto, property) && !this._isPropertyParam(dto, property)) {
 					return false;
 				}
+				if (omit.includes(property)) {
+					return false;
+				}
 				return true;
 			})
 			.map((property) => {
@@ -135,6 +138,7 @@ export default class RSDto {
 						...this._toParams(
 							new (this._getPropertyShape(dto, property))(),
 							this._getNestedOptional(property, optional),
+							this._getNestedProperties(property, omit),
 						),
 					);
 				}
@@ -146,6 +150,7 @@ export default class RSDto {
 						...this._toParams(
 							new (this._getPropertyShapeArray(dto, property))(),
 							this._getNestedOptional(property, optional),
+							this._getNestedProperties(property, omit),
 						),
 					);
 				}
@@ -164,6 +169,9 @@ export default class RSDto {
 				if (this._isPropertyParam(dto, property) && !this._isPropertyResponse(dto, property)) {
 					return false;
 				}
+				if (omit.includes(property)) {
+					return false;
+				}
 				return true;
 			})
 			.map((property) => {
@@ -173,6 +181,7 @@ export default class RSDto {
 						this._getPropertyDescription(dto, property),
 						...this._toResponse(
 							new (this._getPropertyShape(dto, property))(),
+							this._getNestedProperties(property, omit),
 						),
 					);
 				}
@@ -182,6 +191,7 @@ export default class RSDto {
 						this._getPropertyDescription(dto, property),
 						...this._toResponse(
 							new (this._getPropertyShapeArray(dto, property))(),
+							this._getNestedProperties(property, omit),
 						),
 					);
 				}
@@ -252,7 +262,11 @@ export default class RSDto {
 	}
 
 	private static _getNestedOptional(property: string, optional: Array<string>): Array<string> {
-		return optional
+		return this._getNestedProperties(property, optional);
+	}
+
+	private static _getNestedProperties(property: string, a: Array<string>): Array<string> {
+		return a
 			.map((field) => {
 				const firstDot = field.indexOf('.');
 				if (firstDot < 0) {

@@ -199,4 +199,34 @@ describe('Decorators', () => {
 			),
 		]);
 	});
+
+	it('checks the omit override', () => {
+		expect(RSDto.toParams(TestDto, undefined, ['both'])).to.be.deep.equal([
+			new Param('name', true, Type.string, 'Name'),
+			new Param('param', false, Type.string, 'Param only'),
+			new Param.Shape(
+				'shape',
+				true,
+				'',
+				new Param('test', true, Type.string, 'Test'),
+				new Param('boolean', false, Type.boolean, ''),
+			),
+		]);
+		expect(RSDto.toParams(TestDto, undefined, ['shape.test'])).to.be.deep.equal([
+			new Param('name', true, Type.string, 'Name'),
+			new Param('param', false, Type.string, 'Param only'),
+			new Param('both', false, Type.string, 'Both'),
+			new Param.Shape(
+				'shape',
+				true,
+				'',
+				new Param('boolean', false, Type.boolean, ''),
+			),
+		]);
+		expect(RSDto.toResponse(TestDto, ['shape'])).to.be.deep.equal([
+			new Field('id', Type.integer, 'ID'),
+			new Field('name', Type.string, 'Name'),
+			new Field('both', Type.string, 'Both'),
+		]);
+	});
 });

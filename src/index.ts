@@ -7,6 +7,11 @@ import required from './decorators/required';
 import response from './decorators/response';
 import typeDecorator from './decorators/type';
 
+import ArgsDto from './legacy/args.dto';
+import BaseDto from './legacy/base.dto';
+import RequestDto from './legacy/request.dto';
+import ResponseDto from './legacy/response.dto';
+
 export interface IStore {
 	__properties__: Array<string>;
 	__params__: Array<string>;
@@ -20,6 +25,13 @@ export interface IStore {
 
 // tslint:disable-next-line: no-empty-interface
 export interface IRSDto { }
+
+export {
+	ArgsDto,
+	BaseDto,
+	RequestDto,
+	ResponseDto,
+};
 
 export default class RSDto {
 
@@ -102,6 +114,13 @@ export default class RSDto {
 
 	// #endregion
 
+	/**
+	 * Gets the list of parameters defined in the DTO Class.
+	 *
+	 * @param Dto Class to get the parameters from.
+	 * @param optional List of optional parameters to override.
+	 * @param omit List of ignored parameters.
+	 */
 	public static toParams(
 		Dto: new (...args: any[]) => IRSDto,
 		optional: Array<string> = [],
@@ -110,7 +129,16 @@ export default class RSDto {
 		return this._toParams(new Dto() as unknown as IStore, optional, omit);
 	}
 
-	public static toResponse(Dto: new (...args: any[]) => IRSDto, omit: Array<string> = []) {
+	/**
+	 * Gets the list of response fields in the DTO Class.
+	 *
+	 * @param Dto Class to get the response fields from.
+	 * @param omit List of ignored fields
+	 */
+	public static toResponse(
+		Dto: new (...args: any[]) => IRSDto,
+		omit: Array<string> = [],
+	): Array<Field | FieldShape | FieldShapeArray> {
 		return this._toResponse(new Dto() as unknown as IStore, omit);
 	}
 

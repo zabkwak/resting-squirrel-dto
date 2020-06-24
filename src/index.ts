@@ -283,7 +283,7 @@ export default class RSDto {
 	}
 
 	private static _getProperties(dto: IStore): Array<string> {
-		return [...(dto.__properties__ || []), ...Object.getOwnPropertyNames(dto)]
+		return (dto.__properties__ || [])
 			.filter((property) => ![
 				'__descriptions__', '__properties__', '__types__', '__shapes__', '__shape_arrays__', '__required__', '__params__', '__responses__',
 			].includes(property));

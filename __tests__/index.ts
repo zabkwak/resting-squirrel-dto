@@ -84,7 +84,13 @@ class TestRequestDto implements IRSDto {
 }
 
 // tslint:disable-next-line: max-classes-per-file
-class TestDto implements IRSDto {
+class BaseClass {
+
+	public someParam: string = 'something';
+}
+
+// tslint:disable-next-line: max-classes-per-file
+class TestDto extends BaseClass implements IRSDto {
 
 	@RSDto.integer
 	@RSDto.response
@@ -111,7 +117,11 @@ class TestDto implements IRSDto {
 	@RSDto.required
 	public shape: TestRequestShapeDto;
 
-	constructor(baf: string) { }
+	public baf: string = 'test';
+
+	constructor(baf: string) {
+		super();
+	}
 }
 
 describe('Decorators', () => {

@@ -1,6 +1,6 @@
 # resting-squirrel-dto
 DTO helper for [resting-squirrel](https://www.npmjs.com/package/resting-squirrel).  
-The fields and params can be defined with the extended DTO class with defined properties. The properties can define type and description of the `Field` and required flag for the `Param` using decorators.
+The fields and params can be defined with decorators on properties. The properties can define type and description of the `Field` and required flag for the `Param`.
 
 ## Installation
 ```bash
@@ -12,7 +12,97 @@ npm install resting-squirrel-dto --save
 ```javascript
 import rs from 'resting-squirrel'; // peer dependency
 
-import RSDto, { RequestDto, ResponseDto } from 'resting-squirrel-dto';
+import RSDto from 'resting-squirrel-dto';
+
+import MyCoolModel from './my-cool-model';
+
+class User extends MyCoolModel {
+
+	@RSDto.integer
+	@RSDto.response
+	@RSDto.description('ID')
+	id;
+
+	@RSDto.string
+	@RSDto.required
+	@RSDto.description('Name')
+	name;
+
+	@RSDto.string
+	@RSDto.param
+	@RSDto.description('Param only')
+	param;
+
+	@RSDto.string
+	@RSDto.param
+	@RSDto.response
+	@RSDto.description('Both')
+	both;
+}
+
+const app = rs();
+
+app.post(0, '/user', {
+	description: 'Creates new user',
+	params: User.toParams(),
+	response: User.toFields(),
+}, async ({ body }) => {
+	return somehowCreateUser(body);
+});
+
+app.start();
+```
+### Typescript
+```typescript
+import rs, { IRequest } from 'resting-squirrel'; // peer dependency
+
+import RSDto, { IRSDto } from 'resting-squirrel-dto';
+
+import MyCoolModel from './my-cool-model';
+
+class User extends MyCoolModel implements IRSDto {
+
+	@RSDto.integer
+	@RSDto.response
+	@RSDto.description('ID')
+	public id: number;
+
+	@RSDto.string
+	@RSDto.required
+	@RSDto.description('Name')
+	public name: string;
+
+	@RSDto.string
+	@RSDto.param
+	@RSDto.description('Param only')
+	public param: string;
+
+	@RSDto.string
+	@RSDto.param
+	@RSDto.response
+	@RSDto.description('Both')
+	public both: string;
+}
+
+const app = rs();
+
+app.post<IRequest<{}, {}, User>>(0, '/user', {
+	description: 'Creates new user',
+	params: User.toParams(),
+	response: User.toFields(),
+}, async ({ body }) => {
+	return somehowCreateUser(body);
+});
+
+app.start();
+```
+
+## Legacy usage
+### Javascript
+```javascript
+import rs from 'resting-squirrel'; // peer dependency
+
+import { RequestDto, ResponseDto, BaseDto } from 'resting-squirrel-dto';
 
 class UserRequestDto extends RequestDto {
 
@@ -68,7 +158,7 @@ class UserDto extends RSDto {
 
 const app = rs();
 
-app.put(0, '/user', {
+app.post(0, '/user', {
 	description: 'Creates new user',
 	params: UserRequestDto.toArray(),
 	response: UserResponseDto.toArray(),
@@ -76,7 +166,7 @@ app.put(0, '/user', {
 	return somehowCreateUser(body);
 });
 
-app.put(1, '/user', {
+app.post(1, '/user', {
 	description: 'Creates new user',
 	params: UserDto.toParams(),
 	response: UserDto.toFields(),
@@ -92,7 +182,7 @@ app.start();
 ```typescript
 import rs, { IRequest } from 'resting-squirrel'; // peer dependency
 
-import { RequestDto, ResponseDto } from 'resting-squirrel-dto';
+import { RequestDto, ResponseDto, BaseDto } from 'resting-squirrel-dto';
 
 class UserRequestDto extends RequestDto {
 
@@ -148,7 +238,7 @@ class UserDto extends RSDto {
 
 const app = rs();
 
-app.put<IRequest<{}, {}, UserRequestDto>>(0, '/user', {
+app.post<IRequest<{}, {}, UserRequestDto>>(0, '/user', {
 	description: 'Creates new user',
 	params: UserRequestDto.toArray(),
 	response: UserResponseDto.toArray(),
@@ -156,7 +246,7 @@ app.put<IRequest<{}, {}, UserRequestDto>>(0, '/user', {
 	return somehowCreateUser(body);
 });
 
-app.put(1, '/user', {
+app.post(1, '/user', {
 	description: 'Creates new user',
 	params: UserDto.toParams(),
 	response: UserDto.toFields(),
@@ -169,7 +259,9 @@ app.start();
 ```
 
 ## Classes
-### BaseDto (default export)
+### RSDto (default export)
+Class with static methods to convert the classes.
+### BaseDto
 Base DTO for use unified definition. It can define params and response properties.
 #### Methods
 ##### `toResponse`
@@ -275,6 +367,19 @@ Defines the property as an any.
 Defines the property as an enum.
 ##### `shape(shape: typeof BaseDto)`
 Defines the property as a shape.
+
+## Migration to v2
+V2 is removing the dependency on the extending base dto class. Every class can be used as the DTO.  
+All default imports of the module should be replaced with the `BaseDto` class export for same functionality.
+```javascript
+// v1
+import RSDto from 'resting-squirrel-dto';
+// v2
+import { RSDto } from 'resting-squirrel-dto';
+
+export default class UserDto extends RSDto { }
+```
+No other extra actions needed.
 
 ## Thanks
 - [misablaha](https://github.com/misablaha) for the idea.

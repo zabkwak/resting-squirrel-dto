@@ -2,34 +2,35 @@ import { expect } from 'chai';
 import rs, { IRequest } from 'resting-squirrel';
 import RSConnector from 'resting-squirrel-connector';
 
-import { RequestDto, ResponseDto } from '../src';
+import RSDto from '../src';
+import { IRSDto } from '../src';
 
-class UserRequestDto extends RequestDto {
+class UserRequestDto implements IRSDto {
 
-	@RequestDto.string
-	@RequestDto.required
-	@RequestDto.description('First name of the user')
+	@RSDto.string
+	@RSDto.required
+	@RSDto.description('First name of the user')
 	public firstName: string;
 
-	@RequestDto.string
-	@RequestDto.required
-	@RequestDto.description('Last name of the user')
+	@RSDto.string
+	@RSDto.required
+	@RSDto.description('Last name of the user')
 	public lastName: string;
 }
 
 // tslint:disable-next-line: max-classes-per-file
-class UserResponseDto extends ResponseDto {
+class UserResponseDto implements IRSDto {
 
-	@ResponseDto.integer
-	@ResponseDto.description('Identifier of the user')
+	@RSDto.integer
+	@RSDto.description('Identifier of the user')
 	public id: string;
 
-	@ResponseDto.string
-	@ResponseDto.description('First name of the user')
+	@RSDto.string
+	@RSDto.description('First name of the user')
 	public firstName: string;
 
-	@ResponseDto.string
-	@ResponseDto.description('Last name of the user')
+	@RSDto.string
+	@RSDto.description('Last name of the user')
 	public lastName: string;
 }
 
@@ -39,8 +40,8 @@ const app = rs({
 
 app.put<IRequest<{}, {}, UserRequestDto>>(0, '/user', {
 	description: 'Creates new user',
-	params: UserRequestDto.toArray(),
-	response: UserResponseDto.toArray(),
+	params: RSDto.toParams(UserRequestDto),
+	response: RSDto.toResponse(UserResponseDto),
 }, async ({ body }) => {
 	return {
 		id: 1,

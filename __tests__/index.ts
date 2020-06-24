@@ -1,122 +1,123 @@
 import { expect } from 'chai';
 import { Field, Param, Type } from 'resting-squirrel';
 
-import BaseDto, { RequestDto, ResponseDto } from '../src';
+import RSDto, { IRSDto } from '../src';
 
-class NestedShapeResponseDto extends ResponseDto {
+class NestedShapeResponseDto implements IRSDto {
 
-	@ResponseDto.string
-	@ResponseDto.description('Nested shape test property')
+	@RSDto.string
+	@RSDto.description('Nested shape test property')
 	public test: string;
 }
 
 // tslint:disable-next-line: max-classes-per-file
-class ShapeResponseDto extends ResponseDto {
+class ShapeResponseDto implements IRSDto {
 
-	@ResponseDto.string
-	@ResponseDto.description('Shape test property')
+	@RSDto.string
+	@RSDto.description('Shape test property')
 	public test: string;
 
-	@ResponseDto.shape(NestedShapeResponseDto)
-	@ResponseDto.description('Nested shape property')
+	@RSDto.shape(NestedShapeResponseDto)
+	@RSDto.description('Nested shape property')
 	public shape: NestedShapeResponseDto;
 }
 
 // tslint:disable-next-line: max-classes-per-file
-class ShapeArrayResponseDto extends ResponseDto {
+class ShapeArrayResponseDto implements IRSDto {
 
-	@ResponseDto.string
-	@ResponseDto.description('Shape array test property')
+	@RSDto.string
+	@RSDto.description('Shape array test property')
 	public test: string;
 }
 
 // tslint:disable-next-line: max-classes-per-file
-class TestResponseDto extends ResponseDto {
+class TestResponseDto implements IRSDto {
 
-	@ResponseDto.string
-	@ResponseDto.description('Test property')
+	@RSDto.string
+	@RSDto.description('Test property')
 	public test: string;
 
-	@ResponseDto.shape(ShapeResponseDto)
-	@ResponseDto.description('Shape property')
+	@RSDto.shape(ShapeResponseDto)
+	@RSDto.description('Shape property')
 	public shape: ShapeResponseDto;
 
-	@ResponseDto.arrayOf(ShapeArrayResponseDto)
-	@ResponseDto.description('Shape array property')
+	@RSDto.arrayOf(ShapeArrayResponseDto)
+	@RSDto.description('Shape array property')
 	public shapeArray: Array<ShapeArrayResponseDto>;
 }
 
 // tslint:disable-next-line: max-classes-per-file
-class TestRequestShapeDto extends RequestDto {
+class TestRequestShapeDto implements IRSDto {
 
-	@RequestDto.string
-	@RequestDto.required
-	@RequestDto.description('Test')
+	@RSDto.string
+	@RSDto.required
+	@RSDto.description('Test')
 	public test: string;
 
-	@RequestDto.boolean
+	@RSDto.boolean
 	public boolean: boolean;
 }
 
 // tslint:disable-next-line: max-classes-per-file
-class TestRequestDto extends RequestDto {
+class TestRequestDto implements IRSDto {
 
-	@RequestDto.string
-	@RequestDto.description('Test property')
-	@RequestDto.required
+	@RSDto.string
+	@RSDto.description('Test property')
+	@RSDto.required
 	public test: string;
 
-	@RequestDto.string
-	@RequestDto.description('Optional property')
+	@RSDto.string
+	@RSDto.description('Optional property')
 	public optional: string;
 
-	@RequestDto.shape(TestRequestShapeDto)
+	@RSDto.shape(TestRequestShapeDto)
 	public shape: TestRequestShapeDto;
 
-	@RequestDto.arrayOf(Type.string)
+	@RSDto.arrayOf(Type.string)
 	public array: Array<string>;
 
-	@RequestDto.enum('baf', 'lek')
-	@RequestDto.required
+	@RSDto.enum('baf', 'lek')
+	@RSDto.required
 	public enum: 'baf' | 'lek';
 
 	// public noDecorators: any;
 }
 
 // tslint:disable-next-line: max-classes-per-file
-class TestDto extends BaseDto {
+class TestDto implements IRSDto {
 
-	@BaseDto.integer
-	@BaseDto.response
-	@BaseDto.description('ID')
+	@RSDto.integer
+	@RSDto.response
+	@RSDto.description('ID')
 	public id: number;
 
-	@BaseDto.string
-	@BaseDto.required
-	@BaseDto.description('Name')
+	@RSDto.string
+	@RSDto.required
+	@RSDto.description('Name')
 	public name: string;
 
-	@BaseDto.string
-	@BaseDto.param
-	@BaseDto.description('Param only')
+	@RSDto.string
+	@RSDto.param
+	@RSDto.description('Param only')
 	public param: string;
 
-	@BaseDto.string
-	@BaseDto.param
-	@BaseDto.response
-	@BaseDto.description('Both')
+	@RSDto.string
+	@RSDto.param
+	@RSDto.response
+	@RSDto.description('Both')
 	public both: string;
 
-	@BaseDto.shape(TestRequestShapeDto)
-	@BaseDto.required
+	@RSDto.shape(TestRequestShapeDto)
+	@RSDto.required
 	public shape: TestRequestShapeDto;
-}
 
+	constructor(baf: string) { }
+}
 
 describe('Decorators', () => {
 
 	it('checks the generated properties', () => {
-		expect(TestResponseDto.toArray()).to.be.deep.equal([
+		expect(RSDto.toResponse(TestResponseDto)).to.be.deep.equal([
 			new Field('test', Type.string, 'Test property'),
 			new Field.Shape(
 				'shape',
@@ -126,10 +127,10 @@ describe('Decorators', () => {
 			),
 			new Field.ShapeArray(
 				'shapeArray', 'Shape array property', new Field('test', Type.string, 'Shape array test property',
-				)),
+			)),
 		]);
 
-		expect(TestRequestDto.toArray()).to.be.deep.equal([
+		expect(RSDto.toParams(TestRequestDto)).to.be.deep.equal([
 			new Param('test', true, Type.string, 'Test property'),
 			new Param('optional', false, Type.string, 'Optional property'),
 			new Param.Shape(
@@ -146,7 +147,7 @@ describe('Decorators', () => {
 	});
 
 	it('checks the unified dto', () => {
-		expect(TestDto.toParams()).to.be.deep.equal([
+		expect(RSDto.toParams(TestDto)).to.be.deep.equal([
 			new Param('name', true, Type.string, 'Name'),
 			new Param('param', false, Type.string, 'Param only'),
 			new Param('both', false, Type.string, 'Both'),
@@ -158,7 +159,7 @@ describe('Decorators', () => {
 				new Param('boolean', false, Type.boolean, ''),
 			),
 		]);
-		expect(TestDto.toResponse()).to.be.deep.equal([
+		expect(RSDto.toResponse(TestDto)).to.be.deep.equal([
 			new Field('id', Type.integer, 'ID'),
 			new Field('name', Type.string, 'Name'),
 			new Field('both', Type.string, 'Both'),
@@ -172,7 +173,7 @@ describe('Decorators', () => {
 	});
 
 	it('checks the optional parameters override', () => {
-		expect(TestDto.toParams(['name', 'shape'])).to.be.deep.equal([
+		expect(RSDto.toParams(TestDto, ['name', 'shape'])).to.be.deep.equal([
 			new Param('name', false, Type.string, 'Name'),
 			new Param('param', false, Type.string, 'Param only'),
 			new Param('both', false, Type.string, 'Both'),
@@ -184,7 +185,7 @@ describe('Decorators', () => {
 				new Param('boolean', false, Type.boolean, ''),
 			),
 		]);
-		expect(TestDto.toParams(['name', 'shape.test'])).to.be.deep.equal([
+		expect(RSDto.toParams(TestDto, ['name', 'shape.test'])).to.be.deep.equal([
 			new Param('name', false, Type.string, 'Name'),
 			new Param('param', false, Type.string, 'Param only'),
 			new Param('both', false, Type.string, 'Both'),

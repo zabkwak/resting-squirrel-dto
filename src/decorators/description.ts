@@ -1,7 +1,7 @@
-import BaseDto, { IStore } from '../base.dto';
+import RSDto, { IRSDto, IStore } from '..';
 
 export default (description: string) => {
-	return (target: BaseDto<any>, property: string) => {
+	return (target: IRSDto, property: string) => {
 		const t = target as unknown as IStore;
 		if (!t.__descriptions__) {
 			t.__descriptions__ = {};

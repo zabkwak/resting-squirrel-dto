@@ -351,6 +351,8 @@ Defines the property as an array of type from [runtime-type](https://www.npmjs.c
 Defines the description to the property.
 ##### `required`
 Defines the property as required.
+##### `required`
+Defines the property as optional.
 ##### `integer`
 Defines the property as an integer.
 ##### `string`

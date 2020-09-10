@@ -1,6 +1,7 @@
 import { Field, Type } from 'resting-squirrel';
 
 import RSDto, { IRSDto, IStore } from '..';
+import { defineStoreProperty } from '../utils';
 import typeDecorator from './type';
 
 export default (type: Type.Type | (new () => IRSDto)) => {
@@ -9,14 +10,10 @@ export default (type: Type.Type | (new () => IRSDto)) => {
 			typeDecorator(Type.arrayOf(type as Type.Type))(target, property);
 		} else {
 			const t = target as unknown as IStore;
-			if (!t.__shape_arrays__) {
-				t.__shape_arrays__ = {};
-			}
+			defineStoreProperty(t, '__shape_arrays__', {});
 			const _type = type;
 			t.__shape_arrays__[property] = _type as new () => IStore;
-			if (!t.__properties__) {
-				t.__properties__ = [];
-			}
+			defineStoreProperty(t, '__properties__', []);
 			target.__properties__.push(property);
 		}
 	};

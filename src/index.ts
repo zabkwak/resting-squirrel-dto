@@ -2,6 +2,7 @@ import { Field, FieldShape, FieldShapeArray, Param, ParamShape, ParamShapeArray,
 
 import arrayOf from './decorators/arrayof';
 import description from './decorators/description';
+import optionalDecorator from './decorators/optional';
 import param from './decorators/param';
 import required from './decorators/required';
 import response from './decorators/response';
@@ -11,12 +12,14 @@ import ArgsDto from './legacy/args.dto';
 import BaseDto from './legacy/base.dto';
 import RequestDto from './legacy/request.dto';
 import ResponseDto from './legacy/response.dto';
+import { getStoreArrayProperty, getStoreMapProperty } from './utils';
 
 export interface IStore {
 	__properties__: Array<string>;
 	__params__: Array<string>;
 	__responses__: Array<string>;
 	__required__: Array<string>;
+	__optional__: Array<string>;
 	__descriptions__: { [property: string]: string };
 	__shapes__: { [property: string]: new () => IStore };
 	__shape_arrays__: { [property: string]: new () => IStore };
@@ -56,6 +59,11 @@ export default class RSDto {
 	 * Indicates if the property is required. Usable only on parameters.
 	 */
 	public static required = required;
+
+	/**
+	 * Indicates if the property is optional. Usable only on parameters.
+	 */
+	public static optional = optionalDecorator;
 
 	/**
 	 * Defines the property as parameter.
@@ -232,15 +240,17 @@ export default class RSDto {
 	}
 
 	private static _getPropertyDescription(dto: IStore, property: string): string {
-		if (dto.__descriptions__) {
-			return dto.__descriptions__[property] || '';
+		const m = getStoreMapProperty(dto, '__descriptions__');
+		if (m) {
+			return m[property] || '';
 		}
 		return '';
 	}
 
 	private static _getPropertyType(dto: IStore, property: string): Type.Type {
-		if (dto.__types__) {
-			return dto.__types__[property] || Type.any;
+		const m = getStoreMapProperty(dto, '__types__');
+		if (m) {
+			return m[property] || Type.any;
 		}
 		return Type.any;
 	}
@@ -254,39 +264,35 @@ export default class RSDto {
 	}
 
 	private static _getPropertyShape(dto: IStore, property: string): new () => IStore {
-		if (dto.__shapes__) {
-			return dto.__shapes__[property];
-		}
-		return null;
+		const m = getStoreMapProperty(dto, '__shapes__');
+		return m ? m[property] : null;
 	}
 
 	private static _getPropertyShapeArray(dto: IStore, property: string): new () => IStore {
-		if (dto.__shape_arrays__) {
-			return dto.__shape_arrays__[property];
-		}
-		return null;
+		const m = getStoreMapProperty(dto, '__shape_arrays__');
+		return m ? m[property] : null;
 	}
 
 	private static _isPropertyRequired(dto: IStore, property: string, optional: Array<string> = []): boolean {
 		if (optional.includes(property)) {
 			return false;
 		}
-		return (dto.__required__ || []).includes(property);
+		if (getStoreArrayProperty(dto, '__optional__').includes(property)) {
+			return false;
+		}
+		return getStoreArrayProperty(dto, '__required__').includes(property);
 	}
 
 	private static _isPropertyParam(dto: IStore, property: string): boolean {
-		return (dto.__params__ || []).includes(property);
+		return getStoreArrayProperty(dto, '__params__').includes(property);
 	}
 
 	private static _isPropertyResponse(dto: IStore, property: string): boolean {
-		return (dto.__responses__ || []).includes(property);
+		return getStoreArrayProperty(dto, '__responses__').includes(property);
 	}
 
 	private static _getProperties(dto: IStore): Array<string> {
-		return (dto.__properties__ || [])
-			.filter((property) => ![
-				'__descriptions__', '__properties__', '__types__', '__shapes__', '__shape_arrays__', '__required__', '__params__', '__responses__',
-			].includes(property));
+		return getStoreArrayProperty(dto, '__properties__');
 	}
 
 	private static _getNestedOptional(property: string, optional: Array<string>): Array<string> {

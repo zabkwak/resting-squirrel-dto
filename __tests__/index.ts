@@ -124,6 +124,77 @@ class TestDto extends BaseClass implements IRSDto {
 	}
 }
 
+// tslint:disable-next-line: max-classes-per-file
+class ParentDto implements IRSDto {
+
+	@RSDto.integer
+	@RSDto.response
+	public id: number;
+
+	@RSDto.string
+	@RSDto.param
+	public parentParam: string;
+
+	@RSDto.string
+	@RSDto.response
+	public parentResponse: string;
+
+	@RSDto.string
+	public overrideDescription: string;
+
+	@RSDto.string
+	@RSDto.param
+	public overrideRequired: string;
+
+	@RSDto.arrayOf(Type.string)
+	public parentArray: string[];
+
+	@RSDto.shape(TestRequestShapeDto)
+	public parentShape: TestRequestShapeDto;
+
+	@RSDto.string
+	@RSDto.param
+	@RSDto.required
+	public requiredParam: string;
+
+	@RSDto.string
+	@RSDto.param
+	public param: string;
+}
+
+// tslint:disable-next-line: max-classes-per-file
+class ChildDto extends ParentDto {
+
+	@RSDto.string
+	public name: string;
+
+	@RSDto.string
+	@RSDto.param
+	public childParam: string;
+
+	@RSDto.string
+	@RSDto.response
+	public childResponse: string;
+
+	@RSDto.description('Child description')
+	public overrideDescription: string;
+
+	@RSDto.required
+	public overrideRequired: string;
+
+	@RSDto.arrayOf(Type.string)
+	public childArray: string[];
+
+	@RSDto.shape(TestRequestShapeDto)
+	public childShape: TestRequestShapeDto;
+
+	@RSDto.optional
+	public requiredParam: string;
+
+	@RSDto.response
+	public param: string;
+}
+
 describe('Decorators', () => {
 
 	it('checks the generated properties', () => {
@@ -237,6 +308,83 @@ describe('Decorators', () => {
 			new Field('id', Type.integer, 'ID'),
 			new Field('name', Type.string, 'Name'),
 			new Field('both', Type.string, 'Both'),
+		]);
+	});
+
+	it('checks the inheritance', () => {
+		expect(RSDto.toParams(ParentDto)).to.be.deep.equal([
+			new Param('parentParam', false, Type.string, ''),
+			new Param('overrideDescription', false, Type.string, ''),
+			new Param('overrideRequired', false, Type.string, ''),
+			new Param('parentArray', false, Type.arrayOf(Type.string), ''),
+			new Param.Shape(
+				'parentShape',
+				false,
+				'',
+				new Param('test', true, Type.string, 'Test'),
+				new Param('boolean', false, Type.boolean, ''),
+			),
+			new Param('requiredParam', true, Type.string, ''),
+			new Param('param', false, Type.string, ''),
+		]);
+		expect(RSDto.toResponse(ParentDto)).to.be.deep.equal([
+			new Field('id', Type.integer, ''),
+			new Field('parentResponse', Type.string, ''),
+			new Field('overrideDescription', Type.string, ''),
+			new Field('parentArray', Type.arrayOf(Type.string), ''),
+			new Field.Shape(
+				'parentShape',
+				'',
+				new Field('test', Type.string, 'Test'),
+				new Field('boolean', Type.boolean, ''),
+			),
+		]);
+		expect(RSDto.toParams(ChildDto)).to.be.deep.equal([
+			new Param('parentParam', false, Type.string, ''),
+			new Param('overrideDescription', false, Type.string, 'Child description'),
+			new Param('overrideRequired', true, Type.string, ''),
+			new Param('parentArray', false, Type.arrayOf(Type.string), ''),
+			new Param.Shape(
+				'parentShape',
+				false,
+				'',
+				new Param('test', true, Type.string, 'Test'),
+				new Param('boolean', false, Type.boolean, ''),
+			),
+			new Param('requiredParam', false, Type.string, ''),
+			new Param('param', false, Type.string, ''),
+			new Param('name', false, Type.string, ''),
+			new Param('childParam', false, Type.string, ''),
+			new Param('childArray', false, Type.arrayOf(Type.string), ''),
+			new Param.Shape(
+				'childShape',
+				false,
+				'',
+				new Param('test', true, Type.string, 'Test'),
+				new Param('boolean', false, Type.boolean, ''),
+			),
+		]);
+		expect(RSDto.toResponse(ChildDto)).to.be.deep.equal([
+			new Field('id', Type.integer, ''),
+			new Field('parentResponse', Type.string, ''),
+			new Field('overrideDescription', Type.string, 'Child description'),
+			new Field('parentArray', Type.arrayOf(Type.string), ''),
+			new Field.Shape(
+				'parentShape',
+				'',
+				new Field('test', Type.string, 'Test'),
+				new Field('boolean', Type.boolean, ''),
+			),
+			new Field('param', Type.string, ''),
+			new Field('name', Type.string, ''),
+			new Field('childResponse', Type.string, ''),
+			new Field('childArray', Type.arrayOf(Type.string), ''),
+			new Field.Shape(
+				'childShape',
+				'',
+				new Field('test', Type.string, 'Test'),
+				new Field('boolean', Type.boolean, ''),
+			),
 		]);
 	});
 });

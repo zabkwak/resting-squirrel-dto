@@ -1,4 +1,4 @@
-import { IStore } from './';
+import RSDto, { IRSDto, IStore } from './';
 
 export const defineStoreProperty = <K extends keyof IStore>(target: IStore, name: K, value: any) => {
 	if (!target.hasOwnProperty(name)) {
@@ -31,4 +31,35 @@ export const getStoreMapProperty = <K extends keyof IStore, T = any>(target: ISt
 		return null;
 	}
 	return { ...(parentMap || {}), ...(m || {}) };
+};
+
+export class BaseListDto<T> implements IRSDto {
+
+	// @RSDto.integer
+	// @RSDto.description('Count of items.')
+	// @RSDto.response
+	public count: number;
+
+	// @RSDto.response
+	public items: T[];
+}
+
+export const createListDto = <T>(
+	Dto: new (...args: any[]) => T,
+	description: string = 'List of items.',
+): typeof BaseListDto => {
+	// tslint:disable-next-line: max-classes-per-file
+	class ListDto extends BaseListDto<T> {
+
+		@RSDto.integer
+		@RSDto.description('Count of items.')
+		@RSDto.response
+		public count: number;
+
+		@RSDto.arrayOf(Dto)
+		@RSDto.description(description)
+		@RSDto.response
+		public items: T[];
+	}
+	return ListDto as typeof BaseListDto;
 };

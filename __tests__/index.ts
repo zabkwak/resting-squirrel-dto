@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Field, Param, Type } from 'resting-squirrel';
 
-import RSDto, { IRSDto } from '../src';
+import RSDto, { IRSDto, createListDto } from '../src';
 
 class NestedShapeResponseDto implements IRSDto {
 
@@ -195,6 +195,14 @@ class ChildDto extends ParentDto {
 	public param: string;
 }
 
+// tslint:disable-next-line: max-classes-per-file
+class ListItem implements IRSDto {
+
+	@RSDto.string
+	@RSDto.description('Name of the item.')
+	public name: string;
+}
+
 describe('Decorators', () => {
 
 	it('checks the generated properties', () => {
@@ -385,6 +393,13 @@ describe('Decorators', () => {
 				new Field('test', Type.string, 'Test'),
 				new Field('boolean', Type.boolean, ''),
 			),
+		]);
+	});
+
+	it('checks the list dto helper', () => {
+		expect(RSDto.toResponse(createListDto<ListItem>(ListItem, 'List of list items.'))).to.be.deep.equal([
+			new Field('count', Type.integer, 'Count of items.'),
+			new Field.ShapeArray('items', 'List of list items.', new Field('name', Type.string, 'Name of the item.')),
 		]);
 	});
 });

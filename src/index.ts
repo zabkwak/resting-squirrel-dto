@@ -12,7 +12,7 @@ import ArgsDto from './legacy/args.dto';
 import BaseDto from './legacy/base.dto';
 import RequestDto from './legacy/request.dto';
 import ResponseDto from './legacy/response.dto';
-import { getStoreArrayProperty, getStoreMapProperty } from './utils';
+import { createListDto, getStoreArrayProperty, getStoreMapProperty } from './utils';
 
 export interface IStore {
 	__properties__: Array<string>;
@@ -34,6 +34,7 @@ export {
 	BaseDto,
 	RequestDto,
 	ResponseDto,
+	createListDto,
 };
 
 export default class RSDto {

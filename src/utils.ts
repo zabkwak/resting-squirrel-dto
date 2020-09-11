@@ -47,12 +47,13 @@ export class BaseListDto<T> implements IRSDto {
 export const createListDto = <T>(
 	Dto: new (...args: any[]) => T,
 	description: string = 'List of items.',
+	countDescription: string = 'Count of items.',
 ): typeof BaseListDto => {
 	// tslint:disable-next-line: max-classes-per-file
 	class ListDto extends BaseListDto<T> {
 
 		@RSDto.integer
-		@RSDto.description('Count of items.')
+		@RSDto.description(countDescription)
 		@RSDto.response
 		public count: number;
 

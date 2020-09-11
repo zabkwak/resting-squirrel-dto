@@ -1,6 +1,6 @@
 {
 	"name": "resting-squirrel-dto",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"description": "DTO helper for resting-squirrel.",
 	"main": "index.js",
 	"types": "./dist/index.d.ts",

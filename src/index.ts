@@ -34,7 +34,6 @@ export {
 	BaseDto,
 	RequestDto,
 	ResponseDto,
-	createListDto,
 };
 
 export default class RSDto {
@@ -122,6 +121,14 @@ export default class RSDto {
 	public static shape = (shape: new () => IRSDto) => RSDto.type(shape);
 
 	// #endregion
+
+	/**
+	 * Creates a ListDto that defines count and items.
+	 * @param dto The DTO item for the items.
+	 * @param description Description of the items field.
+	 */
+	// tslint:disable-next-line: member-ordering
+	public static createListDto = createListDto;
 
 	/**
 	 * Gets the list of parameters defined in the DTO Class.

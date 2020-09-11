@@ -3,7 +3,7 @@ import RSDto, { IRSDto, IStore } from './';
 export const defineStoreProperty = <K extends keyof IStore>(target: IStore, name: K, value: any) => {
 	if (!target.hasOwnProperty(name)) {
 		Object.defineProperty(target, name, {
-			enumerable: false,
+			enumerable: true,
 			value,
 			writable: true,
 		});
